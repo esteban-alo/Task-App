@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>{{ user_mail }} Notes App </title>
+    <!-- Javascript -->
+    <script src="../static/js/jquery.js"></script>
+    <script src="../static/js/material.js"></script>
+    <script src="../static/js/dialog-polyfill.js"></script>
+    <!-- Styles -->
+    <link rel="stylesheet" href="../static/bootstrap.css">
+    <link rel="stylesheet" href="../static/signup.css">
+    <link rel="stylesheet" href="../static/mdl.css">
+    <link rel="stylesheet" href="../static/list.css">
+    <link rel="stylesheet" href="../static/dialog-polyfill.css">
+    <!-- Material Design icon font -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  </head>
+
+  <body>
+    <!-- No header, and the drawer stays open on larger screens (fixed drawer). -->
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+      <header class="mdl-layout__header">
+        <div class="mdl-layout__header-row">
+          <div class="mdl-layout-spacer"></div>
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--expandable mdl-textfield--floating-label mdl-textfield--align-right">
+              <a id="addUser" href="#">SignIn</a>
+          </div>
+        </div>
+      </header>
+      <main class="mdl-layout__content">
+        <div class="page-content">
+          <div class="container">
+            <h3>Notes App</h3>
+            <div class="jumbotron">
+              <form class="form-signin" action="{{ url_for('login') }}" method="post">
+                <label for="inputName" class="sr-only">Email address</label>
+                <input type="text" name="inputName" id="inputName" class="form-control" placeholder="Email address" required autofocus/>
+                <label for="inputPassword" class="sr-only">Password</label>
+                <input type="password" name="inputPassword" id="inputPassword" class="form-control" placeholder="Password" required/>
+                <input type="submit" value="Log in" class="btn btn-primary btn-large btn-block" >
+              </form>
+            </div>
+          </div>
+        </div>
+      </main>
+      <footer class="mdl-mini-footer">
+        <div class="mdl-mini-footer__left-section">
+          <div class="mdl-logo"><b>Notes App</b></div>
+          <ul class="mdl-mini-footer__link-list">
+            <li><a href="http://www.github.com"><i class="fa fa-github" aria-hidden="true"></i></a></li>
+            <li><a href="#">Esteban_Alo</a></li>
+          </ul>
+        </div>
+      </footer>
+    </div>
+     <dialog class="mdl-dialog">
+      <h4 class="mdl-dialog__title">Add User</h4>
+      <div class="mdl-dialog__content">
+        <form id="createUser" action="{{ url_for('create_user') }}" method="post">
+          <div class="mdl-textfield mdl-js-textfield">
+            <label for="userName">Name:</label>
+            <input type="text" class="mdl-textfield__input" id="userName" name="userName">
+            <br>
+            <label for="userPassword">Password:</label>
+            <input type="password" class="mdl-textfield__input" id="userPassword" name="userPassword">
+          </div>
+        </form>
+      </div>
+        <div class="mdl-dialog__actions">
+          <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" form="createUser" value="Submit">Submit</button>
+          <button type="button" class="mdl-button close">Cancel</button>
+        </div>
+    </dialog>
+    <!-- Create Task -->
+
+    <script>
+      var dialog = document.querySelector('dialog');
+      var showDialogButton = document.querySelector('#addUser');
+      if (! dialog.showModal) {
+        dialogPolyfill.registerDialog(dialog);
+      }
+      showDialogButton.addEventListener('click', function() {
+        dialog.showModal();
+      });
+      dialog.querySelector('.close').addEventListener('click', function() {
+      dialog.close();
+      });
+    </script>
+
+  </body>
+</html>

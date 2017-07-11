@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{ user_mail }} Notes App </title>
+    <!-- Javascript -->
+    <script src="../static/js/jquery.js"></script>
+    <script src="../static/js/material.js"></script>
+    <script src="../static/js/dialog-polyfill.js"></script>
+    <!-- Styles -->
+    <link rel="stylesheet" href="../static/mdl.css">
+    <link rel="stylesheet" href="../static/list.css">
+    <link rel="stylesheet" href="../static/dialog-polyfill.css">
+    <!-- Material Design icon font -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  </head>
+  <body>
+    <!-- Always shows a header, even in smaller screens. -->
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+      <header class="mdl-layout__header">
+        <div class="mdl-layout__header-row">
+          <!-- Title -->
+          <span class="mdl-layout-title">To do list</span>
+          <!-- Add spacer, to align navigation to the right -->
+          <div class="mdl-layout-spacer"></div>
+          <!-- Navigation. We hide it in small screens. -->
+          <nav class="mdl-navigation mdl-layout--large-screen-only">
+            <a class="mdl-navigation__link" href="">Hello {{ user_name }}</a>
+            <a class="mdl-navigation__link" href="{{ url_for('logout') }}">Logout</a>
+          </nav>
+        </div>
+      </header>
+      <div class="mdl-layout__drawer">
+        <span class="mdl-layout-title">To do List</span>
+        <nav class="mdl-navigation">
+          <a class="mdl-navigation__link" href="">{{ user_name }}</a>
+          <a class="mdl-navigation__link" href="{{ url_for('logout') }}">Logout</a>
+        </nav>
+      </div>
+      <main class="mdl-layout__content">
+        <div class="page-content">
+          <table id="tableTaskList" class="mdl-data-table mdl-js-data-table mdl-data-table--selectable mdl-shadow--2dp">
+            <thead>
+             <tr>
+               <th class="mdl-data-table__cell--non-numeric">Task</th>
+               <th>Delete</th>
+             </tr>
+            </thead>
+            <tbody>
+              {% for task in user_task_list %}
+              {% if task['task_status'] == True -%}
+              <tr class="is-selected" id="{{ task['id'] }}">
+              {% else  -%}
+              <tr id="{{ task['id'] }}">
+              {%- endif %}
+                <td class="mdl-data-table__cell--non-numeric">{{ task['task_text'] }}</td>
+                <td>
+                  <button type="button" name="delete" class="mdl-button mdl-js-button mdl-button--icon mdl-button--colored" value="{{ task['id'] }}">
+                    <i class="material-icons">delete</i>
+                  </button>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </main>
+      <!-- Add task button -->
+      <button id="add-task" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--colored">
+        <i class="material-icons">add</i>
+      </button>
+
+      <!-- Footer -->
+      <footer class="mdl-mini-footer">
+        <div class="mdl-mini-footer__left-section">
+          <div class="mdl-logo"><b>Notes App</b></div>
+          <ul class="mdl-mini-footer__link-list">
+            <li><a href="http://www.github.com"><i class="fa fa-github" aria-hidden="true"></i></a></li>
+            <li><a href="#">Esteban_Alo</a></li>
+          </ul>
+        </div>
+      </footer>
+    </div>
+
+    <!-- Create Task -->
+    <dialog class="mdl-dialog">
+      <h4 class="mdl-dialog__title">Add Task</h4>
+      <div class="mdl-dialog__content">
+        <form action="{{ url_for('create_note') }}"id="createTask" method="post">
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+            <input class="mdl-textfield__input" type="text" name="inputTask" id="inputTask">
+            <label class="mdl-textfield__label" for="inputTask">Write your task here</label>
+            <input type="hidden" type="text" name="inputUserId" id="inputUserId" value="{{ user_id }}">
+          </div>
+        </form>
+      </div>
+        <div class="mdl-dialog__actions">
+          <button type="submit"  class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" form="createTask" value="Submit">Submit</button>
+          <button type="button" class="mdl-button close">Cancel</button>
+        </div>
+    </dialog>
+  <script>
+    var dialog = document.querySelector('dialog');
+    var showDialogButton = document.querySelector('#add-task');
+    if (! dialog.showModal) {
+        dialogPolyfill.registerDialog(dialog);
+    }
+    showDialogButton.addEventListener('click', function() {
+        dialog.showModal();
+    });
+    dialog.querySelector('.close').addEventListener('click', function() {
+    dialog.close();
+    });
+  </script>
+  <script>
+    $('button[name=delete]').click(function () {
+      var data = {}
+      data['task_id'] = $(this).attr('value');
+      $.ajax({
+        url: '{{ url_for('delete_user_task') }}',
+        data: JSON.stringify(data, null, '\t'),
+        contentType: 'application/json;charset=UTF-8',
+        type: 'POST',
+        success: function(response) {
+          if( response === "Success") {
+            document.location.reload(true);
+          }
+        },
+        error: function(error) {
+          console.log(error);
+        }
+      });
+    });
+  </script>
+  <script>
+    function debounce(func, wait, immediate) {
+      var timeout;
+      return function() {
+        var context = this, args = arguments;
+        var later = function() {
+          timeout = null;
+          if (!immediate) func.apply(context, args);
+        };
+        var callNow = immediate && !timeout;
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+        if (callNow) func.apply(context, args);
+      };
+    }
+
+    $(document).on("click", ".mdl-checkbox", debounce(function (e) {
+      var isChecked = !$(this).hasClass("is-checked");
+      var task_id = $(this).closest('tr').attr('id');
+      var data = {}
+      data['task_status'] = isChecked
+      data['task_id'] = task_id
+      $.ajax({
+        url: '{{ url_for('check_task') }}',
+        data: JSON.stringify(data, null, '\t'),
+        contentType: 'application/json;charset=UTF-8',
+        type: 'POST',
+        success: function(response) {
+          if( response === "Success") {
+            document.location.reload(true);
+          }
+        },
+        error: function(error) {
+          console.log(error);
+        }
+      });
+    }, 250, true));
+  </script>
+
+  </body>
+</html>

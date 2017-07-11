@@ -1,0 +1,15 @@
+#add-task {
+    margin-bottom: 5%;
+    margin-right: 5%;
+}
+
+#tableTaskList {
+    width: calc(65% - 16px);
+    margin: 10% auto;
+}
+
+dialog {
+  position: fixed;
+  top: 50%;
+  transform: translate(0, -50%);
+}
